@@ -3,3 +3,18 @@ body,html{
   font-size: 20px;
   text-align: center;
 }
+.image{
+  width: 200px;
+  height: 200px;
+  background-size: 100% auto;
+  background-repeat:no-repeat;
+  border-radius: 10px;
+  background-image: url('./image/dog.png');
+}
+.content img{
+  width: 200px;
+  height: 200px;
+  background-size: 100% auto;
+  background-repeat:no-repeat;
+  border-radius: 10px;
+}

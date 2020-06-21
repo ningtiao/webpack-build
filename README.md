@@ -99,3 +99,81 @@ new HtmlWebpackPlugin({
 - 继续执行打包命令 yarn webpack,这个时候build中的index.html会自动将js引入,直接打开html 看效果就可以啦!
 
 ### 图片资源打包
+- yarn add url-loader file-loader html-loader --dev
+- 这里我在image 文件夹中放入一张图片
+```javascript
+{
+  // 处理图片
+  test: /\.(jpg|png|gif)$/,
+  loader: 'url-loader',
+  options: {
+    // 图片大小小于8kb,就会被base64处理
+    // 优点: 减少请求数量(减轻服务器压力)
+    // 缺点: 图片体积会更大(文件请求速度更慢)
+    limit: 10 * 1024
+  }
+},
+{
+  test: /\.html$/,
+  // 处理html文件img图片
+  loader: 'html-loader'
+}
+```
+- 因为url-loader默认是使用es6模块化解析的,而html-loader引入图片是commonjs,解析会出现问题: [object Module],使用commonjs解析
+- 关闭url-loader的es6 module esModule: false
+```
+
+{
+  // 处理图片
+  test: /\.(jpg|png|gif)$/,
+  loader: 'url-loader',
+  options: {
+    // 图片大小小于8kb,就会被base64处理
+    // 优点: 减少请求数量(减轻服务器压力)
+    // 缺点: 图片体积会更大(文件请求速度更慢)
+    limit: 10 * 1024,
+    esModule: false,
+    // 给图片进行命名
+    // [hash:10] 取图片前10位
+    // ext取原来的扩展名
+    name: '[hash:10].[ext]'
+  }
+},
+```
+- 执行yarn webpack 就可看到刚刚处理的图片资源了
+
+### 打包其他资源
+这里在阿里Iconfont上下载了几个图标来进行打包
+- 在src 下建立font 文件 将图标所需文件拷贝进去
+- 在index.js 引入 iconfont.css
+- 在webpack.config.js配置
+```
+// 打包其他资源font
+{
+  exclude: /\.(css|js|html|less|png)$/,
+  loader: 'file-loader'
+}
+```
+### webpack devServer 开发服务器 自动打包
+- yarn add webpack-dev-server --dev
+- yarn webpack-dev-server
+```javascript
+  devServer: {
+    contentBase: resolve(__dirname, 'build'),
+    compress: true, // 启动gzip压缩
+    port: '3000', //端口号,
+    // proxy: { // 代理
+    //   '/api': {
+    //     // http://localhost:8080/api/users -> https: //api.github.com/api/users
+    //     target: 'https: //api.github.com',
+    //     // 代理路径从写
+    //     pathRewrite: {
+    //       '^/api': ''
+    //     },
+    //     changeOrigin: true
+    //   }
+    // }
+  },
+
+```
+这个时候我们在修改页面的内容时就会自动打包自动编译了,是不是轻松多了?非常好的开发体验
