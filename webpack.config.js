@@ -1,5 +1,7 @@
 const { resolve } =  require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+
+
 module.exports = {
   // webpack配置
   // 入口起点

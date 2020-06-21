@@ -366,3 +366,14 @@ plugins: [
   backface-visibility: hidden;
 }
 ```
+### 压缩CSS
+- yarn add optimize-css-assets-webpack-plugin --dev
+```javascript
+const  OptimizeCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plugin')
+
+plugins: [
+  // 压缩css
+  new OptimizeCssAssetsWebpackPlugin()
+]
+```
+- 执行命令 yarn build:prod 就可以看到压缩后的css代码啦
