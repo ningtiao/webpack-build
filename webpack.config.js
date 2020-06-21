@@ -17,6 +17,7 @@ module.exports = {
     contentBase: resolve(__dirname, 'build'),
     compress: true, // 启动gzip压缩
     port: '3000', //端口号,
+    open: true, // 自动打开浏览器
     // proxy: {
     //   '/api': {
     //     // http://localhost:8080/api/users -> https: //api.github.com/api/users
@@ -53,18 +54,24 @@ module.exports = {
           esModule: false,
           // 给图片进行命名
           // [hash:10] 取图片前10位
-          name: '[hash:10].[ext]'
+          name: '[hash:10].[ext]',
+          outputPath: 'image'
         }
       },
       {
         test: /\.html$/,
         // 处理html文件img图片
-        loader: 'html-loader'
+        loader: 'html-loader',
       },
       // 打包其他资源font
       {
         exclude: /\.(css|js|html|less|png)$/,
-        loader: 'file-loader'
+        loader: 'file-loader',
+        options: {
+          // [hash:10] 取图片前10位
+          name: '[hash:10].[ext]',
+          outputPath: 'font'
+        }
       }
     ]
   },
@@ -73,7 +80,7 @@ module.exports = {
     // 功能默认会创建一个空的HTML, 自动引入打包输入的所有资源
     // 需要有解构的html结构
     new HtmlWebpackPlugin({
-      template: './src/index.html'
+      template: './src/view/index.html'
     })
   ],
   // 模式
