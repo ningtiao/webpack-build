@@ -1,4 +1,22 @@
 {
+  "scripts": {
+    "start": "webpack-dev-server --open --config webpack.config.js",
+    "prod:start": "webpack-dev-server --open --config webpack.prod.js",
+    "dev": "webpack --config webpack.config.js",
+    "build:prod": "webpack --config webpack.prod.js"
+  },
+  "browserslist": {
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ],
+    "prodection": [
+      ">0.2%",
+      "not dead",
+      "not op_min all"
+    ]
+  },
   "devDependencies": {
     "css-loader": "^3.6.0",
     "file-loader": "^6.0.0",
@@ -6,6 +24,9 @@
     "html-webpack-plugin": "^4.3.0",
     "less": "^3.11.3",
     "less-loader": "^6.1.1",
+    "mini-css-extract-plugin": "^0.9.0",
+    "postcss-loader": "^3.0.0",
+    "postcss-preset-env": "^6.7.0",
     "style-loader": "^1.2.1",
     "url-loader": "^4.1.0",
     "webpack": "^4.43.0",

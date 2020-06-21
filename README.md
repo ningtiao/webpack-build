@@ -278,3 +278,91 @@ options: {
 }
 
 ```
+
+### 构建生产环境
+- css 处理整合在js中, 导致js文件体积变大, 同时因为是先加载js,才能通过style标签插入到页面中,会出现闪屏现象。所以我们需要优化css 从js 提取出来,还要对代码同意压缩
+- 样式部分js 代码兼容问题
+- 当然还有很多问题要优化
+- 第一能让我们的代码更好更快更强的运行, 性能更好。 各个浏览器平稳运行不会出现问题。
+- 事情多,需要在生产环境进行构建
+
+#### 第一步 提取css 成单独文件
+yarn add mini-css-extract-plugin --dev
+
+<!-- "scripts": {
+  "start": "webpack-dev-server --open --config webpack.config.js",
+  "build": "webpack webpack.prod.js"
+}, -->
+```javascript
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+// 我们需要将style-loader 替换成 MiniCssExtractPlugin.loader
+rules: [
+  {
+    test: /\.(less|css)$/,
+    // 使用哪些loader
+    use: [
+      // use 数组中loader 执行顺序, 从右到左,从下到上一次执行
+      // MiniCssExtractPlugin取代style.loader
+      // 提取js中的单css 成单独文件
+      {
+        loader: MiniCssExtractPlugin.loader
+      },
+      'css-loader', // 将css文件变成commonjs 模块加载到模块中,里面内容是字符串
+      'less-loader'  // 将less文件编译成css 文件
+  }
+]
+
+plugins: [
+  new MiniCssExtractPlugin({
+    filename: 'css/common.css'
+  })
+]
+
+```
+### 兼容性处理
+- css 兼容性处理: postcss ---> yarn add postcss-loader postcss-preset-env --dev
+- 使用loader 默认配置
+- postcss-loader
+- 修改loader 配置
+- 帮postcss找到package.json 中的browserslist里面的配置,通过配置兼容指定的css 兼容性样式
+```javascript
+// package.json 添加
+// >0.2%  大于99.8
+// 开发环境 设置node环境变量 process.env.NODE_ENv = development
+// development开发
+// prodection生产
+
+"borwserslist": {
+  "development": [
+    "last 1 chrome version",
+    "last 1 firefox version",
+    "last 1 safari version"
+  ],
+  "prodection": [
+    ">0.2%",
+    "not dead",
+    "not op_min all"
+  ]
+},
+
+// 修改css loader的配置
+
+{
+  loader: 'postcss-loader',
+  options: {
+    ident: 'postcss',
+    plugins: () => [
+      require('postcss-preset-env')()
+    ]
+  }
+}
+// 执行yarn build:prod
+// 兼容样式之后的代码 会默认添加-weblit-前缀
+.wrapper {
+  width: 100px;
+  height: 100px;
+  background-color: darkseagreen;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+```
