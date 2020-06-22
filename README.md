@@ -377,3 +377,55 @@ plugins: [
 ]
 ```
 - 执行命令 yarn build:prod 就可以看到压缩后的css代码啦
+
+### js语法检查eslint
+- 语法检查 eslint-loader eslint
+- 只检查自己写的源代码,第三方库不检查
+- 设置检查规则
+- package.json 中eslintConfig中设置
+
+- airbnb -> eslint-config-airbnb-base eslint eslint-plugin-import --dev
+- 下一行eslint 所有规则都失效
+- eslint-disable-next-line
+```
+{
+  test: /\.js$/,
+  exclude: /node_module/,
+  loader: 'eslint-loader',
+  options: {
+    // 自动修复
+    fix: true
+  }
+}
+"eslintConfig": {
+  extends: "airbnb-base"
+}
+
+```
+
+### 压缩HTML和js
+- 生产环境下会自动压缩代码
+
+### html压缩
+```
+new HtmlWebpackPlugin({
+  template: './src/view/index.html',
+  minify: {
+    // 移除空格
+    collapseWhitespace: true,
+    removeComments: true // 移除注释
+  }
+}),
+
+```
+
+### 生产环境配置
+```javascript
+- 一个loader 只能被一个loader 处理
+- 先执行eslint 在执行babel
+module.exports = {
+
+}
+
+
+```
