@@ -1,5 +1,5 @@
 const { resolve } = require('path');
-
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plugin')
 // 定义环境变量
@@ -107,7 +107,15 @@ module.exports = {
     new MiniCssExtractPlugin({
       filename: 'css/[name].css'
     }),
-    new OptimizeCssAssetsWebpackPlugin()
+    new OptimizeCssAssetsWebpackPlugin(),
+    new HtmlWebpackPlugin({
+      template: './src/view/index.html',
+      minify: {
+        // 移除空格
+        collapseWhitespace: true,
+        removeComments: true // 移除注释
+      }
+    })
   ],
   mode: 'production'
 }

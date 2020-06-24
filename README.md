@@ -618,5 +618,6 @@ devtool: 'source-map'
 - hidden
 - eval
 - 
-
+内联和外部的区别
+1. 外部生成了文件,内联没有
 ```
