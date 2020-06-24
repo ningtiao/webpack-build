@@ -51,6 +51,9 @@ module.exports = {
         ]
       },
       {
+
+      },
+      {
         // 处理图片
         test: /\.(jpg|png|gif)$/,
         loader: 'url-loader',

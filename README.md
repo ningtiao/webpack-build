@@ -5,7 +5,7 @@
 ### 基础配置
 ```javascript
 const { resolve } =  require('path')
-
+// resolve用来拼接绝对路径的方法
 module.exports = {
   // webpack配置
   // 入口起点
@@ -16,6 +16,7 @@ module.exports = {
     // __dirname是node.js的变量,代表当前文件目录绝对路径
     path: resolve(__dirname, 'build') // 输出路径
   },
+  // 详细loader配置
   module: {
     rules: [
 
@@ -71,9 +72,20 @@ build
 ```
 - yarn add less-loader less --dev
 ```
+// 匹配哪些文件
+{
+  test: /\.css$/,
+  use: [
+    // 创建style标签,将js中的样式资源插入进行
+    'style-loader',
+    'css-loader'
+  ]
+}
+
 {
   test: /\.less$/,
   use: [
+    // 创建style标签,将js中的样式资源插入进行
     'style-loader',
     'css-loader',
     // 将less文件编译成css 文件
@@ -215,13 +227,22 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.(less|css)$/,
+        test: /\.(less)$/,
         // 使用哪些loader
         use: [
           // use 数组中loader 执行顺序, 从右到左,从下到上一次执行
           'style-loader', // 创建style标签, 将js的模式资源插入进行,添加到head 中生效
           'css-loader', // 将css文件变成commonjs 模块加载到模块中,里面内容是字符串
           'less-loader'  // 将less文件编译成css 文件
+        ]
+      },
+      {
+        test: /\.(css)$/,
+        // 使用哪些loader
+        use: [
+          // use 数组中loader 执行顺序, 从右到左,从下到上一次执行
+          'style-loader', // 创建style标签, 将js的模式资源插入进行,添加到head 中生效
+          'css-loader', // 将css文件变成commonjs 模块加载到模块中,里面内容是字符串
         ]
       },
       {
@@ -234,6 +255,7 @@ module.exports = {
           // 缺点: 图片体积会更大(文件请求速度更慢)
           limit: 10 * 1024,
           esModule: false,
+          outputPath: 'imgs'
           // 给图片进行命名
           // [hash:10] 取图片前10位
           name: '[hash:10].[ext]'
@@ -269,6 +291,8 @@ module.exports = {
 }
 
 ```
+### 生产环境构建
+- css 代码压缩打包优化兼容
 
 ### 如何让打包文件和目录文件一致
 - 其实只要在每个use 下面的options配置outputPath就行了
@@ -423,9 +447,176 @@ new HtmlWebpackPlugin({
 ```javascript
 - 一个loader 只能被一个loader 处理
 - 先执行eslint 在执行babel
-module.exports = {
+const { resolve } = require('path');
 
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const OptimizeCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plugin')
+// 定义环境变量
+process.env.NODE_ENV = 'production'
+// 复用loader
+
+const commonCssLoader = [
+  MiniCssExtractPlugin.loader,
+  'css-loader',
+  {
+    loader: 'postcss-loader', // 兼容css
+    options: {
+      ident: 'postcss',
+      plugins: () => [require('postcss-preset-env')()]
+    }
+  }
+];
+module.exports = {
+  entry: './src/index.js',
+  output: {
+    filename: 'js/bundle.js',
+    path: resolve(__dirname, 'build'),
+  },
+  module: {
+    rules: [
+      {
+        test: /.css$/,
+        use: [...commonCssLoader]
+      },
+      {
+        test: /.less$/,
+        use: [
+          ...commonCssLoader,
+          'less-loader'
+        ]
+      },
+      {
+        // eslint
+        // 在package.js eslintConfig
+        test: /\.js$/,
+        exclude: /node_modules/,
+        // 优先执行
+        enforce: 'pre',
+        loader: 'eslint-loader',
+        options: {
+          fix: true
+        }
+      },
+      {
+        // eslint
+        // 在package.js eslintConfig
+        test: /\.js$/,
+        exclude: /node_modules/,
+        loader: 'babel-loader',
+        options: {
+          presets: [
+            [
+              '@babel/preset-env',
+              {
+                useBuiltIns: 'usage',
+                corejs: { version: 3 },
+                target: {
+                  chorme: '60',
+                  firefox: '50'
+                }
+              }
+            ]
+          ]
+        }
+      },
+      {
+        // 处理图片
+        test: /\.(jpg|png|gif)$/,
+        loader: 'url-loader',
+        options: {
+          // 图片大小小于8kb,就会被base64处理
+          // 优点: 减少请求数量(减轻服务器压力)
+          // 缺点: 图片体积会更大(文件请求速度更慢)
+          limit: 10 * 1024,
+          esModule: false,
+          // 给图片进行命名
+          // [hash:10] 取图片前10位
+          name: '[hash:10].[ext]',
+          outputPath: 'image'
+        }
+      },
+      {
+        test: /\.html$/,
+        // 处理html文件img图片
+        loader: 'html-loader',
+      },
+      // 打包其他资源font
+      {
+        exclude: /\.(css|js|html|less|png)$/,
+        loader: 'file-loader',
+        options: {
+          // [hash:10] 取图片前10位
+          name: '[hash:10].[ext]',
+          outputPath: 'font'
+        }
+      }
+    ]
+  },
+  plugins: [
+    new MiniCssExtractPlugin({
+      filename: 'css/[name].css'
+    }),
+    new OptimizeCssAssetsWebpackPlugin(),
+    new HtmlWebpackPlugin({
+      template: './src/view/index.html',
+      minify: {
+        // 移除空格
+        collapseWhitespace: true,
+        removeComments: true // 移除注释
+      }
+    })
+  ],
+  mode: 'production'
 }
 
+
+```
+
+### 性能优化
+- 开发环境性能优化
+- 生产环境性能优化
+
+## 开发环境性能优化
+- 优化打包构建速度
+- 优化代码运行的性能
+
+### webpack HMR
+
+### 热模块替换 极大的提升构建速度
+
+- 样式文件: 可以开启HMR,在style-loader内部实现了
+- js文件: 默认不能使用HMR功能
+- html文件: 默认不能使用HMR功能,同时会导致问题,html文件不能更新了
+- 解决: 修改entry入口,将html文件引入
+```
+entry: ['./src/js/index.js', './src/index.html']
+
+devServer: {
+  hot: true
+  // 开启HMR功能
+  // 当修改了webpack 配置,新配置要想生效,必须重新启动
+}
+
+// js
+if (module.hot) {
+  // 一旦module.hot 为true 说明开启了HMR功能
+  // 让HMR功能代码生效
+  mudule.hot.accept('./print, function() {
+    // 方法监听print.js文件的变化,一旦发生变化,其他默认不会重新打包
+    print()
+  })
+}
+```
+
+### source map
+- 开发环境
+- source map 是一种提供源代码到构建后代码映射技术 如果后代码出错了,构建后和源代码千差万别,找代码出错位置难, 构建后代码出错了可以追踪源代码的错误,利于我们调试找出出错的原因
+```
+devtool: 'source-map'
+
+- inline-source-map
+- hidden
+- eval
+- 
 
 ```
