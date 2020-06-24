@@ -6,6 +6,7 @@ module.exports = {
   // webpack配置
   // 入口起点
   entry: './src/index.js',
+  
   // 输出
   output: {
     filename: 'bundle.js', // 输出文件名
@@ -20,6 +21,7 @@ module.exports = {
     compress: true, // 启动gzip压缩
     port: '3000', //端口号,
     open: true, // 自动打开浏览器
+    hot: true,
     // proxy: {
     //   '/api': {
     //     // http://localhost:8080/api/users -> https: //api.github.com/api/users
@@ -32,6 +34,7 @@ module.exports = {
     //   }
     // }
   },
+  devtool: 'inline-source-map',
   module: {
     rules: [
       {

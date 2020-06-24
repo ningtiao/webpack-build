@@ -6,4 +6,4 @@ element.textContent = 'Hello Webpack'
 element.className = 'title'
 document.body.append(element)
 
-console.log('dabic ')
+console.log('dabic ')()

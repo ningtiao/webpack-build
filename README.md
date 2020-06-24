@@ -613,11 +613,81 @@ if (module.hot) {
 - source map 是一种提供源代码到构建后代码映射技术 如果后代码出错了,构建后和源代码千差万别,找代码出错位置难, 构建后代码出错了可以追踪源代码的错误,利于我们调试找出出错的原因
 ```
 devtool: 'source-map'
-
+- source-map
+  错误代码准确信息和源代码错误位置
 - inline-source-map
+ 错误代码准确信息和源代码错误位置
 - hidden
-- eval
-- 
+ 错误代码错误原因,但是没有错误位置
+ 不能追踪源代码错误,只能提示到构建够的代码错误位置
+
+- eval-source-map
+错误代码准确信息和源代码错误位置
+- nosources-source-map
+错误代码准确信息但是没有任何源代码信息
+- cheap-source-map
+错误代码准确信息和源代码错误位置
+- cheap-module-source-map
+错误代码准确信息和源代码错误位置
 内联和外部的区别
 1. 外部生成了文件,内联没有
+2 内联构建速度极快
+开发环境: 速度快,调试更友好
+  速度快(eval> inline> cheap)
+  eval-cheap-source-map
+  eval-source-map
+  调试更友好
+  source-map 
+  cheap-module-source-map
+  cheap-source-map
+  结论eval-source-map -> eval-cheap-module-source-map
+生产环境: 源代码要不要隐藏
+ nosources-source-map
+ hidden-source-map
+内联会让代码体积变大,所以生产不建议
+1 source-map
+3 hidden-source-map
+2 source-map
+```
+
+### code split 文件分割
+
+- 1
+```javascript
+entry: {
+  // 多入口
+  main: './src/js/index.js',
+  test: './src/js/test.js'
+}
+// 输出
+output: {
+  filename: '[name].[contenthash:10].js', // 输出文件名
+  // __dirname是node.js的变量,代表当前文件目录绝对路径
+  path: resolve(__dirname, 'build') // 输出路径
+},
+
+// 重新打包
+// main.67a94b6142.js
+// test.9fd198e20a.js
+// 缺点 不灵活
+```
+2
+optimization 可以将node_modules中的代码单独打包一个chunk最终输出
+自动分析多入口chunk中,有没有公共的文件,如果有会打包成单独一个chunk
+```
+// 会输出多个js 文件代码
+optimization: {
+  splitChunks: {
+    chunks: 'all'
+  }
+}
+
+```
+3 单入口 + optimization
+4 通过js代码,让某个文件被单独打包成一个chunk
+```
+import('./test').then(({mul,count}) => {
+  console.lo('加载成功')
+})
+
 ```
